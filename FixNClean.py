@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import xlrd
 from os.path import join, dirname, abspath
 fname = join(dirname(abspath("Volunteer info survey (Responses)")), "Volunteer info survey (Responses).xlsx")
@@ -38,3 +39,18 @@ for i in range(1,sheet.nrows):
 print(volunteerInformation)
 for i in groups.keys():
     print(groups[i].members, groups[i].timeslot)
+=======
+print "hello world";
+print "hello wolr";
+<<<<<<< HEAD
+<<<<<<< HEAD
+print "testing push";
+=======
+print "i eat ass"
+>>>>>>> 9821349f7e908982770d443f34fb99e9c7f1cf12
+print "hello john";
+=======
+print "i eat ass"
+print "nevermind"
+>>>>>>> 675b450c29bb90dbb3de6cdf6b51cf881e13e432
+>>>>>>> 7094d7a5447ee19a05864e1bcf3c38a665b86357
