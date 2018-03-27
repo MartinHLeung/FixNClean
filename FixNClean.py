@@ -1,4 +1,4 @@
-import xlrd
+import xlrd, xlwt
 from os.path import join, dirname, abspath
 fname = join(dirname(abspath("Volunteer info survey (Responses)")), "Volunteer info survey (Responses).xlsx")
 cname = join(dirname(abspath("Community member information (Responses)")), "Community member information (Responses).xlsx")
@@ -119,6 +119,7 @@ for i in range(4):
                 volunteers[i].append(signuporder[w])
                 w+=1
 averageByTime = [len(volunteers[i])/members[i] for i in range(4)]
+leftovers = []
 
 while not organized:
     if all(averageGroupSize-tolerance<=averageByTime[i]<=averageGroupSize+tolerance for i in range(4)):
@@ -175,7 +176,6 @@ for i in range(4):
                 size -= 1
         while volunteerInformation[volunteers[i][w]] and w<len(volunteers[i]):
             w += 1
-    leftovers = []
     for f in range(len(volunteers[i])):
         if not volunteerInformation[volunteers[i][f]][-2]:
             leftovers.append(volunteers[i][f])
@@ -183,10 +183,38 @@ for i in range(4):
         if  volunteerInformation[l][-1] != -1:
             size = 5-len(groups[volunteerInformation[l][-1]].members)
             for g in groups.keys():
-                if len(groups[g].members) <= size:
+                if len(groups[g].members) <= size and (volunteerInformation[l][2] in groups[g].timeslot or volunteerInformation[l][3] in groups[g].timeslot):
                     groups[g].merge(groups[volunteerInformation[l][-1]])
         else:
             size = 4
             for g in groups.keys():
-                if len(groups[g].members) <= size:
+                if len(groups[g].members) <= size and (volunteerInformation[l][2] in groups[g].timeslot or volunteerInformation[l][3] in groups[g].timeslot):
                     groups[g].merge(groups[volunteerInformation[l][-1]])
+
+for i in communityInformation.keys():
+    for g in groups.keys():
+        if communityInformation[i][4] in groups[g].timeslot and groups[g].client == None:
+            groups[g].client = i
+            break
+
+book1 = xlwt.Workbook()
+sheet1 = book1.add_sheet("Sheet 1", cell_overwrite_ok=True)
+time = [0,0,0,0]
+for i in range(4):
+    sheet1.write(0, i * 4, dates[i])
+count = 0
+for g in groups.keys():
+    if groups[g].client:
+        sheet1.write(1+count*5,4*(communityInformation[groups[g].client][4]), groups[g].client)
+        sheet1.write(2 + count * 5, 4 * (communityInformation[groups[g].client][4]), communityInformation[groups[g].client][1])
+
+        sheet1.write(3 + count * 5, 4 * (communityInformation[groups[g].client][4]), communityInformation[groups[g].client][2])
+
+        for i in range(len(groups[g].members)):
+            sheet1.write(i+1+count*5, 4*(communityInformation[groups[g].client][4])+1, volunteerInformation[groups[i].members[i]][0])
+            sheet1.write(i + 1 + count * 5, 4 * (communityInformation[groups[g].client][4]) + 2, groups[i].members[i])
+            sheet1.write(i+1+count*5, 4*(communityInformation[groups[g].client][4])+3, volunteerInformation[groups[i].members[i]][1])
+
+    count +=1
+
+book.save("Schedule.xls")
