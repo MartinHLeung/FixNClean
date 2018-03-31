@@ -10,6 +10,7 @@ class group:
         self.allergies = allergies
         self.client = None
         self.groupnumber = groupnumber
+        self.switched = False
     def addmember(self, newmember, newallergies):
         self.members.append(newmember)
         if self.allergies == -1:
@@ -154,6 +155,7 @@ for i in range(4):
                             if size == len(groups[volunteerInformation[volunteers[i][x]][-1]].members) and similar:
                                 for v in groups[volunteerInformation[volunteers[i][x]][-1]].members:
                                     volunteerInformation[v][-2] = True
+                                size -= len(groups[volunteerInformation[volunteers[i][x]][-1]].members)
                                 groups[volunteerInformation[volunteers[i][w]][-1]].merge(groups[volunteerInformation[volunteers[i][x]][-1]])
                                 #groups.pop(volunteerInformation[volunteers[i][w]][-1])
 
@@ -162,6 +164,7 @@ for i in range(4):
                             if size == 1 and similar:
                                 volunteerInformation[volunteers[i][x]][-2] = True
                                 groups[volunteerInformation[volunteers[i][w]][-1]].addmember(volunteers[i][x], volunteerInformation[volunteers[i][x]][4])
+                                size -= 1
                 size-=1
         else:#aaaaaaaaaaaaaaaaaaa
             groupCounter += 1
@@ -174,19 +177,24 @@ for i in range(4):
             while size > 0 and len(groups[volunteerInformation[volunteers[i][w]][-1]].members) < int(averageGroupSize):
                 for x in range(len(volunteers[i])):
                     if not volunteerInformation[volunteers[i][x]][-2]:
-                        similar = volunteerInformation[volunteers[i][w]][2:4] == volunteerInformation[volunteers[i][x]][2:4] or volunteerInformation[volunteers[i][w]][2:4] == volunteerInformation[volunteers[i][x]][2:4][::-1]
+                        similar = volunteerInformation[volunteers[i][w]][2:4] == volunteerInformation[volunteers[i][x]][2:4] or volunteerInformation[volunteers[i][w]][2:4] == volunteerInformation[volunteers[i][x]][2:4][::-1] and volunteerInformation[volunteers[i][x]][4] != 4
                         if volunteerInformation[volunteers[i][x]][-1] != -1:
                             if size == len(groups[volunteerInformation[volunteers[i][x]][-1]].members) and similar:
                                 for v in groups[volunteerInformation[volunteers[i][x]][-1]].members:
                                     volunteerInformation[v][-2] = True
+                                size -= len(groups[volunteerInformation[volunteers[i][x]][-1]])
                                 groups[volunteerInformation[volunteers[i][w]][-1]].merge(
                                     groups[volunteerInformation[volunteers[i][x]][-1]])
+                                break
+
                                 #groups.pop(volunteerInformation[volunteers[i][w]][-1])
 
                         else:
                             if size == 1 and similar:
                                 volunteerInformation[volunteers[i][x]][-2] = True
+                                size -= 1
                                 groups[volunteerInformation[volunteers[i][w]][-1]].addmember(volunteers[i][x], volunteerInformation[volunteers[i][x]][4])
+                                break
                 size -= 1
         while volunteerInformation[volunteers[i][w]][-2] and w<=len(volunteers[i])-2:
             w += 1
@@ -198,17 +206,25 @@ for i in range(4):
         if volunteerInformation[l][-1] != -1:
             size = 5 - len(groups[volunteerInformation[l][-1]].members)
             for g in groups.keys():
-                if len(groups[g].members) <= size and (
+                if len(groups[g].members) < size and (
                         volunteerInformation[l][2] in groups[g].timeslot or volunteerInformation[l][3] in groups[
                     g].timeslot):
+                    for v in groups[volunteerInformation[l][-1]].members:
+                        volunteerInformation[v][-2] = True
+                    size -= len(groups[volunteerInformation[l][-1]].members)
                     groups[g].merge(groups[volunteerInformation[l][-1]])
+                    break
         else:
             size = 4
             for g in groups.keys():
-                if len(groups[g].members) <= size and (
+                if len(groups[g].members) < size and (
                         volunteerInformation[l][2] in groups[g].timeslot or volunteerInformation[l][3] in groups[
                     g].timeslot):
-                    groups[g].merge(groups[volunteerInformation[l][-1]])
+                    groups[g].addmember(l, volunteerInformation[l][4])
+                    volunteerInformation[l][-2] = True
+                    size -= 4
+
+
 
 for i in communityInformation.keys():
     for g in groups.keys():
@@ -216,30 +232,102 @@ for i in communityInformation.keys():
         if communityInformation[i][3] in groups[g].timeslot and groups[g].client == None:
             groups[g].client = i
             break
+for g in groups.keys():
+    if groups[g].client:
+
+        time = communityInformation[groups[g].client][3]
+        size = 5 - len(groups[g].members)
+        while len(groups[g].members) < int(averageGroupSize) and size != 0:
+            xyz=0
+            while xyz <= len(signuporder)-1:
+                if size > 1:
+                    if volunteerInformation[signuporder[xyz]][-1] != -1:
+                        if (not volunteerInformation[signuporder[xyz]][-2]) and len(groups[volunteerInformation[signuporder[xyz]][-1]].members) <= size:
+                            for v in groups[volunteerInformation[signuporder[xyz]][-1]].members:
+                                volunteerInformation[v][-2] = True
+                            groups[g].merge(groups[volunteerInformation[signuporder[xyz]][-1]])
+                            size -= len(groups[volunteerInformation[signuporder[xyz]][-1]].members)
+                            xyz += len(groups[volunteerInformation[signuporder[xyz]][-1]].members)
+                elif size == 1:
+                    if (not volunteerInformation[signuporder[xyz]][-2]) and volunteerInformation[signuporder[xyz]][-1] == -1:
+                        groups[g].addmember(signuporder[xyz], volunteerInformation[signuporder[xyz]][4])
+                        volunteerInformation[signuporder[xyz]][-2] = True
+                        xyz+=1
+                        size -= 1
+                xyz+=1
+            size-=1
+
+
 
 
 book1 = xlwt.Workbook()
 sheet1 = book1.add_sheet("Sheet 1", cell_overwrite_ok=True)
 count = [0,0,0,0]
 for i in range(4):
-    sheet1.write(0, i * 4, dates[i])
+    sheet1.write(0, i * 6, dates[i])
 
-print([groups[i].client for i in groups.keys()])
 
 for g in groups.keys():
     if groups[g].client:
         down = communityInformation[groups[g].client][3]
-        sheet1.write(1+count[down]*5,4*down, groups[g].client)
-        sheet1.write(2 + count[down] * 5, 4 * down, communityInformation[groups[g].client][1])
+        sheet1.write(1+count[down]*6,6*down, groups[g].client)
+        sheet1.write(2 + count[down] * 6, 6 * down, communityInformation[groups[g].client][1])
 
-        sheet1.write(3 + count[down] * 5, 4 * down, communityInformation[groups[g].client][2])
+        sheet1.write(3 + count[down] * 6, 6 * down, communityInformation[groups[g].client][2])
 
         for i in range(len(groups[g].members)):
-            sheet1.write(i+1+count[down]*5, 4*down+1, volunteerInformation[groups[g].members[i]][0])
-            sheet1.write(i + 1 + count[down] * 5, 4 * down + 2, groups[g].members[i])
-            sheet1.write(i+1+count[down]*5, 4*down+3, volunteerInformation[groups[g].members[i]][1])
+            sheet1.write(i+1+count[down]*6, 6*down+1, volunteerInformation[groups[g].members[i]][0])
+            sheet1.write(i + 1 + count[down] * 6, 6 * down + 2, groups[g].members[i])
+            sheet1.write(i+1+count[down]*6, 6*down+3, volunteerInformation[groups[g].members[i]][1])
 
         count[(communityInformation[groups[g].client][3])] += 1
+
+
+
+file = open("emails for first schedule.txt", "w+")
+
+for g in groups.keys():
+    if groups[g].client:
+        for i in groups[g].members:
+            file.write("Hey " + volunteerInformation[i][0] + ",\n Thanks for signing up for this year's Fix 'N' Clean!\n\nYou've been assigned to " + groups[g].client + "'s house, during the " + dates[communityInformation[groups[g].cient][3]] + " timeslot. The people in your group are:\n")
+            for l in groups[g].members: file.write(volunteerInformation[l][0] + "\n")
+            file.write("\n Please try and be there at the beginning of the time slot, a link to some directions to your community member's house can be found below\n")
+            file.write(google maps link probably + "\n\n")
+            file.write("Thanks again for participating,\nFix 'N' Clean Co-ordinators\n\n\n\n")
+
+
+for g in groups.keys():
+    if len(groups[g].timeslot) == 2 and groups[g].client:
+        if groups[g].timeslot[1] != 4:
+            for l in groups.keys():
+                if len(groups[l].timeslot) == 2 and groups[l].client and groups[l].timeslot[1] != 4 and l != g and not(groups[g].switched or groups[l].switched):
+                    if groups[g].timeslot == groups[l].timeslot or groups[g].timeslot == groups[l].timeslot[::-1]:
+                        temp = groups[g].client
+                        groups[g].client = groups[l].client
+                        groups[l].client = temp
+                        groups[l].switched = True
+                        groups[g].switched = True
+sheet2 = book1.add_sheet("Sheet 1", cell_overwrite_ok=True)
+count = [0,0,0,0]
+for i in range(4):
+    sheet2.write(0, i * 6, dates[i])
+
+
+for g in groups.keys():
+    if groups[g].client:
+        down = communityInformation[groups[g].client][3]
+        sheet2.write(1+count[down]*6,6*down, groups[g].client)
+        sheet2.write(2 + count[down] * 6, 6 * down, communityInformation[groups[g].client][1])
+
+        sheet2.write(3 + count[down] * 6, 6 * down, communityInformation[groups[g].client][2])
+
+        for i in range(len(groups[g].members)):
+            sheet2.write(i+1+count[down]*6, 6*down+1, volunteerInformation[groups[g].members[i]][0])
+            sheet2.write(i + 1 + count[down] * 6, 6 * down + 2, groups[g].members[i])
+            sheet2.write(i+1+count[down]*6, 6*down+3, volunteerInformation[groups[g].members[i]][1])
+
+        count[(communityInformation[groups[g].client][3])] += 1
+
 
 
 book1.save("Schedule.xls")
