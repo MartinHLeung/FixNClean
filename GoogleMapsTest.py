@@ -63,8 +63,8 @@ groups = {}
 volunteerInformation = {}
 communityInformation = {}
 groupCounter = 0
-dates = ['Saturday September 30th - 9:00-12:00', 'Saturday September 30th - 1:00-4:00',
-         'Sunday October 1st - 9:00-12:00', 'Sunday October 1st - 1:00-4:00', "Only my first choice works for me :("]
+dates = ['Saturday April 28th - 9:00-12:00', 'Saturday April 28th - 1:00-4:00',
+         'Sunday April 29th - 9:00-12:00', 'Sunday April 29th - 1:00-4:00', "Only my first choice works for me :("]
 
 
 
@@ -103,14 +103,14 @@ for i in range(1, csheet.nrows):
 
 def month_string_to_number(string):
     m = {
-        'January': 1,
-        'February': 2,
-        'March': 3,
-        'April':4,
-         'May':5,
-         'June':6,
-         'July':7,
-         'August':8,
+        'jan': 1,
+        'feb': 2,
+        'mar': 3,
+        'apr':4,
+         'may':5,
+         'jun':6,
+         'jul':7,
+         'aug':8,
          'sep':9,
          'oct':10,
          'nov':11,
@@ -154,7 +154,6 @@ for i in communityInformation.keys():
                                          communityInformation[i][4],
                                          mode="transit",
                                          departure_time=dateinfo)
-
     googledata = "/data=!4m6!4m5!2m3!6e1!7e3!8j" + str(epocht) + "!3e3"
     htmladdress = 'https://www.google.com/maps/dir/45+Union+St+W,+Kingston,+ON/' + address + googledata
     duration = directions_result[0]['legs'][0]['duration']['text']
@@ -170,3 +169,5 @@ for i in communityInformation.keys():
         continue
     else : linkarray.append(htmladdress)
 
+
+print (linkarray)
