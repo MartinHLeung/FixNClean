@@ -1,0 +1,24 @@
+def switchingFunction(groups):
+    group_key = list(groups.keys())
+    group_value = list(groups.values())
+    group_timeslot = []
+    for group in group_value:
+        group_timeslot.append(group.timeslot)
+        group_newtimeslot = []
+    for value in group_timeslot:
+        time = {'timeslot1':value[0],'timeslot2':value[1]}
+        group_newtimeslot.append(time)
+    groups = dict(zip(group_key,group_newtimeslot))
+    sameList = []
+    for i in groups:
+        for j in range(i + 1, len(groups) + 1):
+            try:
+                print(groups[i]['timeslot1'], groups[j]['timeslot1'])
+                if groups[i]['timeslot1'] == groups[j]['timeslot2'] and groups[i]['timeslot2'] == groups[j]['timeslot1']:
+                    newlist = [groups.keys(i),groups.keys(j)]
+                    sameList.append(newlist)
+
+            except:
+                j = j + 1
+    print("Following groups can switch.")
+    print(sameList)
